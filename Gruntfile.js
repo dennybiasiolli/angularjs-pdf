@@ -57,6 +57,12 @@ module.exports = function(grunt) {
             expand: true
           },
           {
+            cwd: 'bower_components/pdfjs-dist/web',
+            src: [ '**/*' ],
+            dest: 'example/js/lib/web',
+            expand: true
+          },
+          {
             cwd: 'bower_components/angular',
             src: [ 'angular.min.js', 'angular.min.js.map' ],
             dest: 'example/js/lib',
@@ -135,8 +141,8 @@ module.exports = function(grunt) {
     'jscs',
     'jshint',
     'copy',
-    'uglify',
-    'karma'
+    'uglify'/*,
+    'karma'*/
   ]);
 
   grunt.registerTask('check', [

@@ -1,5 +1,5 @@
 /*! Angular-PDF Version: 1.3.0 | Released under an MIT license */
-/* global angular, PDFJS */
+/* global angular, PDFJS, PDFViewer */
 (function() {
 
   'use strict';
@@ -66,6 +66,9 @@
           }
 
           pdfDoc.getPage(num).then(function(page) {
+            var pdfViewer = PDFJS.PDFViewer;
+            console.log(pdfViewer);
+            console.log(pdfViewer.prototype.pagesCount());
             var viewport;
             var pageWidthScale;
             var renderContext;
