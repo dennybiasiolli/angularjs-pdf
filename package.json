@@ -15,7 +15,6 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "babel-core": "^6.5.2",
     "grunt": "^0.4.5",
     "grunt-bump": "0.7.0",
     "grunt-cli": "0.1.13",
