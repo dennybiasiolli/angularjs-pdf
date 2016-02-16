@@ -1,5 +1,5 @@
 /*! Angular-PDF Version: 1.3.0 | Released under an MIT license */
-/* global angular, PDFJS, PDFViewer */
+/* global angular, PDFJS */
 (function() {
 
   'use strict';
@@ -66,9 +66,6 @@
           }
 
           pdfDoc.getPage(num).then(function(page) {
-            var pdfViewer = PDFJS.PDFViewer;
-            console.log(pdfViewer);
-            console.log(pdfViewer.prototype.pagesCount());
             var viewport;
             var pageWidthScale;
             var renderContext;
@@ -157,6 +154,50 @@
         }
 
         function renderPDF() {
+
+          PDFJS.imageResourcesPath = './images/';
+
+          // var pdfRenderingQueue = new PDFJS.PDFRenderingQueue();
+          // pdfRenderingQueue.onIdle = this.cleanup.bind(this);
+          // this.pdfRenderingQueue = pdfRenderingQueue;
+
+          var pdfLinkService = new PDFJS.PDFLinkService();
+          // this.pdfLinkService = pdfLinkService;
+
+          var container = document.getElementById('viewerContainer');
+          var viewer = document.getElementById('viewer');
+          var pdfViewer = new PDFJS.PDFViewer({
+            container: container,
+            viewer: viewer,
+            // renderingQueue: pdfRenderingQueue,
+            linkService: pdfLinkService
+          });
+          // pdfRenderingQueue.setViewer(pdfViewer);
+          pdfLinkService.setViewer(pdfViewer);
+
+          var scale = 0;
+          var loadingTask = PDFJS.getDocument({'url': url});
+          var pdfLoadingTask = loadingTask;
+          var result = loadingTask.promise.then(
+            function getDocumentCallback(pdfDocument) {
+              var self = this;
+              scale = scale || 1;
+              // var pagesCount = pdfDocument.numPages;
+              // var id = pdfDocument.fingerprint;
+              var baseDocumentUrl = null;
+              pdfLinkService.setDocument(pdfDocument, baseDocumentUrl);
+              pdfViewer.currentPageNumber = 13;
+              pdfViewer.currentScale = scale;
+              pdfViewer.setDocument(pdfDocument);
+            },
+            function getDocumentError(exception) { }
+          );
+          
+          console.log(PDFJS);
+      
+
+
+
           clearCanvas();
 
           var params = {
