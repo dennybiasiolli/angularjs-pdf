@@ -46,6 +46,8 @@
         var canvasid = attrs.canvasid || 'pdf-canvas';
         var canvas = document.getElementById(canvasid);
 
+        var CSS_UNITS = 96.0 / 72.0;
+
         debug = attrs.hasOwnProperty('debug') ? attrs.debug : false;
         var creds = attrs.usecredentials;
         var ctx = canvas.getContext('2d');
@@ -155,7 +157,7 @@
 
         function renderPDF() {
 
-          PDFJS.imageResourcesPath = './images/';
+          // PDFJS.imageResourcesPath = './images/';
 
           // var pdfRenderingQueue = new PDFJS.PDFRenderingQueue();
           // pdfRenderingQueue.onIdle = this.cleanup.bind(this);
@@ -170,33 +172,50 @@
             container: container,
             viewer: viewer,
             // renderingQueue: pdfRenderingQueue,
-            linkService: pdfLinkService
+            linkService: pdfLinkService,
+            removePageBorders: true
           });
           // pdfRenderingQueue.setViewer(pdfViewer);
-          pdfLinkService.setViewer(pdfViewer);
+          //pdfLinkService.setViewer(pdfViewer);
 
           var scale = 0;
-          var loadingTask = PDFJS.getDocument({'url': url});
-          var pdfLoadingTask = loadingTask;
-          var result = loadingTask.promise.then(
+          var loadingTask = PDFJS.getDocument({ 'url': url });
+          /*var pdfLoadingTask = loadingTask;*/
+          /*var result = */loadingTask.promise.then(
             function getDocumentCallback(pdfDocument) {
-              var self = this;
               scale = scale || 1;
               // var pagesCount = pdfDocument.numPages;
               // var id = pdfDocument.fingerprint;
-              var baseDocumentUrl = null;
-              pdfLinkService.setDocument(pdfDocument, baseDocumentUrl);
-              pdfViewer.currentPageNumber = 13;
+
+              pdfLinkService.setDocument(pdfDocument);
               pdfViewer.currentScale = scale;
               pdfViewer.setDocument(pdfDocument);
+
+              // ------------------------------------------------
+              pdfDocument.getPage(scope.pageNum).then(function(pdfPage) {
+                var viewport = pdfPage.getViewport(scale * CSS_UNITS);
+                var textLayerFactory = null;
+                if (!PDFJS.disableTextLayer) {
+                  textLayerFactory = this;
+                }
+                var pageView = new PDFJS.PDFPageView({
+                  container: viewer,
+                  id: scope.pageNum,
+                  scale: scale,
+                  defaultViewport: viewport.clone(),
+                  // renderingQueue: this.renderingQueue,
+                  textLayerFactory: textLayerFactory
+                });
+                pageView.setPdfPage(pdfPage);
+                // console.log();
+                // bindOnAfterAndBeforeDraw(pageView);
+                // this._pages.push(pageView);
+              });
             },
-            function getDocumentError(exception) { }
+            function getDocumentError(/*exception*/) {}
           );
-          
-          console.log(PDFJS);
-      
 
-
+          // ------------------------------------------------------------------
 
           clearCanvas();
 
