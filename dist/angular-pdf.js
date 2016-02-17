@@ -1,5 +1,4 @@
 /*! Angular-PDF Version: 1.3.0 | Released under an MIT license */
-/* global angular, PDFJS */
 (function() {
 
   'use strict';
@@ -9,27 +8,27 @@
     var pdfLoaderTask = null;
     var debug = false;
 
-    var backingScale = function(canvas) {
-      var ctx = canvas.getContext('2d');
-      var dpr = window.devicePixelRatio || 1;
-      var bsr = ctx.webkitBackingStorePixelRatio ||
-        ctx.mozBackingStorePixelRatio ||
-        ctx.msBackingStorePixelRatio ||
-        ctx.oBackingStorePixelRatio ||
-        ctx.backingStorePixelRatio || 1;
+    // var backingScale = function(canvas) {
+    //   var ctx = canvas.getContext('2d');
+    //   var dpr = window.devicePixelRatio || 1;
+    //   var bsr = ctx.webkitBackingStorePixelRatio ||
+    //     ctx.mozBackingStorePixelRatio ||
+    //     ctx.msBackingStorePixelRatio ||
+    //     ctx.oBackingStorePixelRatio ||
+    //     ctx.backingStorePixelRatio || 1;
 
-      return dpr / bsr;
-    };
+    //   return dpr / bsr;
+    // };
 
-    var setCanvasDimensions = function(canvas, w, h) {
-      var ratio = backingScale(canvas);
-      canvas.width = Math.floor(w * ratio);
-      canvas.height = Math.floor(h * ratio);
-      canvas.style.width = Math.floor(w) + 'px';
-      canvas.style.height = Math.floor(h) + 'px';
-      canvas.getContext('2d').setTransform(ratio, 0, 0, ratio, 0, 0);
-      return canvas;
-    };
+    // var setCanvasDimensions = function(canvas, w, h) {
+    //   var ratio = backingScale(canvas);
+    //   canvas.width = Math.floor(w * ratio);
+    //   canvas.height = Math.floor(h * ratio);
+    //   canvas.style.width = Math.floor(w) + 'px';
+    //   canvas.style.height = Math.floor(h) + 'px';
+    //   canvas.getContext('2d').setTransform(ratio, 0, 0, ratio, 0, 0);
+    //   return canvas;
+    // };
     return {
       restrict: 'E',
       templateUrl: function(element, attr) {
@@ -38,19 +37,18 @@
       link: function(scope, element, attrs) {
         element.css('display', 'block');
         var url = scope.pdfUrl;
-        // var httpHeaders = scope.httpHeaders;
+        var httpHeaders = scope.httpHeaders;
         var pdfDoc = null;
         var pageToDisplay = isFinite(attrs.page) ? parseInt(attrs.page) : 1;
         var pageFit = attrs.scale === 'page-fit';
         var scale = attrs.scale > 0 ? attrs.scale : 1;
-        var canvasid = attrs.canvasid || 'pdf-canvas';
-        var canvas = document.getElementById(canvasid);
-
-        var CSS_UNITS = 96.0 / 72.0;
+        // var canvasid = attrs.canvasid || 'pdf-canvas';
+        // var canvas = document.getElementById(canvasid);
+        var container = document.getElementById(attrs.viewerid || 'pdf-viewer');
 
         debug = attrs.hasOwnProperty('debug') ? attrs.debug : false;
-        // var creds = attrs.usecredentials;
-        var ctx = canvas.getContext('2d');
+        var creds = attrs.usecredentials;
+        // var ctx = canvas.getContext('2d');
         var windowEl = angular.element($window);
 
         windowEl.on('scroll', function() {
@@ -69,32 +67,47 @@
 
           pdfDoc.getPage(num).then(function(page) {
             var viewport;
-            var pageWidthScale;
-            var renderContext;
+            // var pageWidthScale;
+            // var renderContext;
 
-            if (pageFit) {
-              viewport = page.getViewport(1);
-              var clientRect = element[0].getBoundingClientRect();
-              pageWidthScale = clientRect.width / viewport.width;
-              scale = pageWidthScale;
-            }
+            // if (pageFit) {
+            //   viewport = page.getViewport(1);
+            //   var clientRect = element[0].getBoundingClientRect();
+            //   pageWidthScale = clientRect.width / viewport.width;
+            //   scale = pageWidthScale;
+            // }
             viewport = page.getViewport(scale);
 
-            setCanvasDimensions(canvas, viewport.width, viewport.height);
+            // setCanvasDimensions(canvas, viewport.width, viewport.height);
 
-            renderContext = {
-              canvasContext: ctx,
-              viewport: viewport
-            };
+            // renderContext = {
+            //   canvasContext: ctx,
+            //   viewport: viewport
+            // };
 
-            renderTask = page.render(renderContext);
-            renderTask.promise.then(function() {
-                if (typeof scope.onPageRender === 'function') {
-                    scope.onPageRender();
-                }
-            }).catch(function (reason) {
-                console.log(reason);
+            // Creating the page view with default parameters.
+            angular.element(container).empty();
+            var pdfPageView = new PDFJS.PDFPageView({
+              container: container,
+              id: num,
+              scale: scale,
+              defaultViewport: viewport,
+              // We can enable text/annotations layers, if needed
+              textLayerFactory: new PDFJS.DefaultTextLayerFactory(),
+              annotationLayerFactory: new PDFJS.DefaultAnnotationLayerFactory()
             });
+            // Associates the actual page with the view, and drawing it
+            pdfPageView.setPdfPage(page);
+            return pdfPageView.draw();
+
+            // renderTask = page.render(renderContext);
+            // renderTask.promise.then(function() {
+            //     if (typeof scope.onPageRender === 'function') {
+            //         scope.onPageRender();
+            //     }
+            // }).catch(function (reason) {
+            //     console.log(reason);
+            // });
           });
         };
 
@@ -137,17 +150,17 @@
           scope.renderPage(scope.pageToDisplay);
         };
 
-        scope.rotate = function() {
-          if (canvas.getAttribute('class') === 'rotate0') {
-            canvas.setAttribute('class', 'rotate90');
-          } else if (canvas.getAttribute('class') === 'rotate90') {
-            canvas.setAttribute('class', 'rotate180');
-          } else if (canvas.getAttribute('class') === 'rotate180') {
-            canvas.setAttribute('class', 'rotate270');
-          } else {
-            canvas.setAttribute('class', 'rotate0');
-          }
-        };
+        // scope.rotate = function() {
+        //   if (canvas.getAttribute('class') === 'rotate0') {
+        //     canvas.setAttribute('class', 'rotate90');
+        //   } else if (canvas.getAttribute('class') === 'rotate90') {
+        //     canvas.setAttribute('class', 'rotate180');
+        //   } else if (canvas.getAttribute('class') === 'rotate180') {
+        //     canvas.setAttribute('class', 'rotate270');
+        //   } else {
+        //     canvas.setAttribute('class', 'rotate0');
+        //   }
+        // };
 
         // function clearCanvas() {
         //   if (ctx) {
@@ -156,101 +169,40 @@
         // }
 
         function renderPDF() {
+        //   clearCanvas();
 
-          // PDFJS.imageResourcesPath = './images/';
+          var params = {
+            'url': url,
+            'withCredentials': creds
+          };
 
-          // var pdfRenderingQueue = new PDFJS.PDFRenderingQueue();
-          // pdfRenderingQueue.onIdle = this.cleanup.bind(this);
-          // this.pdfRenderingQueue = pdfRenderingQueue;
+          if (httpHeaders) {
+            params.httpHeaders = httpHeaders;
+          }
 
-          var pdfLinkService = new PDFJS.PDFLinkService();
-          // this.pdfLinkService = pdfLinkService;
+          if (url && url.length) {
+            pdfLoaderTask = PDFJS.getDocument(params);
+            pdfLoaderTask.then(
+                function(_pdfDoc) {
+                  if (typeof scope.onLoad === 'function') {
+                    scope.onLoad();
+                  }
 
-          var container = document.getElementById('viewerContainer');
-          var viewer = document.getElementById('viewer');
-          var pdfViewer = new PDFJS.PDFViewer({
-            container: container,
-            viewer: viewer,
-            // renderingQueue: pdfRenderingQueue,
-            linkService: pdfLinkService,
-            removePageBorders: true
-          });
-          // pdfRenderingQueue.setViewer(pdfViewer);
-          //pdfLinkService.setViewer(pdfViewer);
+                  pdfDoc = _pdfDoc;
+                  scope.renderPage(scope.pageToDisplay);
 
-          var scale = 0;
-          var loadingTask = PDFJS.getDocument({ 'url': url });
-          /*var pdfLoadingTask = loadingTask;*/
-          /*var result = */loadingTask.promise.then(
-            function getDocumentCallback(pdfDocument) {
-              scale = scale || 1;
-              // var pagesCount = pdfDocument.numPages;
-              // var id = pdfDocument.fingerprint;
-
-              pdfLinkService.setDocument(pdfDocument);
-              pdfViewer.currentScale = scale;
-              pdfViewer.setDocument(pdfDocument);
-
-              // ------------------------------------------------
-              pdfDocument.getPage(scope.pageNum).then(function(pdfPage) {
-                var viewport = pdfPage.getViewport(scale * CSS_UNITS);
-                var textLayerFactory = null;
-                if (!PDFJS.disableTextLayer) {
-                  textLayerFactory = this;
+                  scope.$apply(function() {
+                    scope.pageCount = _pdfDoc.numPages;
+                  });
+                }, function(error) {
+                  if (error) {
+                    if (typeof scope.onError === 'function') {
+                      scope.onError(error);
+                    }
+                  }
                 }
-                var pageView = new PDFJS.PDFPageView({
-                  container: viewer,
-                  id: scope.pageNum,
-                  scale: scale,
-                  defaultViewport: viewport.clone(),
-                  // renderingQueue: this.renderingQueue,
-                  textLayerFactory: textLayerFactory
-                });
-                pageView.setPdfPage(pdfPage);
-                // console.log();
-                // bindOnAfterAndBeforeDraw(pageView);
-                // this._pages.push(pageView);
-              });
-            },
-            function getDocumentError(/*exception*/) {}
-          );
-
-          // ------------------------------------------------------------------
-
-//           clearCanvas();
-//
-//           var params = {
-//             'url': url,
-//             'withCredentials': creds
-//           };
-//
-//           if (httpHeaders) {
-//             params.httpHeaders = httpHeaders;
-//           }
-//
-//           if (url && url.length) {
-//             pdfLoaderTask = PDFJS.getDocument(params);
-//             pdfLoaderTask.then(
-//                 function(_pdfDoc) {
-//                   if (typeof scope.onLoad === 'function') {
-//                     scope.onLoad();
-//                   }
-//
-//                   pdfDoc = _pdfDoc;
-//                   scope.renderPage(scope.pageToDisplay);
-//
-//                   scope.$apply(function() {
-//                     scope.pageCount = _pdfDoc.numPages;
-//                   });
-//                 }, function(error) {
-//                   if (error) {
-//                     if (typeof scope.onError === 'function') {
-//                       scope.onError(error);
-//                     }
-//                   }
-//                 }
-//             );
-//           }
+            );
+          }
         }
 
         scope.$watch('pageNum', function(newVal) {

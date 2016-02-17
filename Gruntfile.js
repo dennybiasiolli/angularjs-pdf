@@ -50,16 +50,9 @@ module.exports = function(grunt) {
             dest: 'example/js/directives/'
           },
           {
-            cwd: 'bower_components/pdfjs-dist/build',
-            src: [ 'pdf.js', 'pdf.worker.js' ],
-            dest: 'example/js/lib',
-            flatten: true,
-            expand: true
-          },
-          {
-            cwd: 'bower_components/pdfjs-dist/web',
+            cwd: 'bower_components/pdfjs-dist',
             src: [ '**/*' ],
-            dest: 'example/js/lib/web',
+            dest: 'example/js/lib/pdfjs-dist',
             expand: true
           },
           {
