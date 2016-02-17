@@ -38,7 +38,7 @@
       link: function(scope, element, attrs) {
         element.css('display', 'block');
         var url = scope.pdfUrl;
-        var httpHeaders = scope.httpHeaders;
+        // var httpHeaders = scope.httpHeaders;
         var pdfDoc = null;
         var pageToDisplay = isFinite(attrs.page) ? parseInt(attrs.page) : 1;
         var pageFit = attrs.scale === 'page-fit';
@@ -49,7 +49,7 @@
         var CSS_UNITS = 96.0 / 72.0;
 
         debug = attrs.hasOwnProperty('debug') ? attrs.debug : false;
-        var creds = attrs.usecredentials;
+        // var creds = attrs.usecredentials;
         var ctx = canvas.getContext('2d');
         var windowEl = angular.element($window);
 
@@ -149,11 +149,11 @@
           }
         };
 
-        function clearCanvas() {
-          if (ctx) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-          }
-        }
+        // function clearCanvas() {
+        //   if (ctx) {
+        //     ctx.clearRect(0, 0, canvas.width, canvas.height);
+        //   }
+        // }
 
         function renderPDF() {
 
@@ -217,40 +217,40 @@
 
           // ------------------------------------------------------------------
 
-          clearCanvas();
-
-          var params = {
-            'url': url,
-            'withCredentials': creds
-          };
-
-          if (httpHeaders) {
-            params.httpHeaders = httpHeaders;
-          }
-
-          if (url && url.length) {
-            pdfLoaderTask = PDFJS.getDocument(params);
-            pdfLoaderTask.then(
-                function(_pdfDoc) {
-                  if (typeof scope.onLoad === 'function') {
-                    scope.onLoad();
-                  }
-
-                  pdfDoc = _pdfDoc;
-                  scope.renderPage(scope.pageToDisplay);
-
-                  scope.$apply(function() {
-                    scope.pageCount = _pdfDoc.numPages;
-                  });
-                }, function(error) {
-                  if (error) {
-                    if (typeof scope.onError === 'function') {
-                      scope.onError(error);
-                    }
-                  }
-                }
-            );
-          }
+//           clearCanvas();
+//
+//           var params = {
+//             'url': url,
+//             'withCredentials': creds
+//           };
+//
+//           if (httpHeaders) {
+//             params.httpHeaders = httpHeaders;
+//           }
+//
+//           if (url && url.length) {
+//             pdfLoaderTask = PDFJS.getDocument(params);
+//             pdfLoaderTask.then(
+//                 function(_pdfDoc) {
+//                   if (typeof scope.onLoad === 'function') {
+//                     scope.onLoad();
+//                   }
+//
+//                   pdfDoc = _pdfDoc;
+//                   scope.renderPage(scope.pageToDisplay);
+//
+//                   scope.$apply(function() {
+//                     scope.pageCount = _pdfDoc.numPages;
+//                   });
+//                 }, function(error) {
+//                   if (error) {
+//                     if (typeof scope.onError === 'function') {
+//                       scope.onError(error);
+//                     }
+//                   }
+//                 }
+//             );
+//           }
         }
 
         scope.$watch('pageNum', function(newVal) {
